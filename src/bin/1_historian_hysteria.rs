@@ -36,7 +36,6 @@ fn find_smallest_distance(left: Vec<i32>, right: Vec<i32>) -> i32 {
 fn find_smallest_distance_with_similarity_score(left: Vec<i32>, right: Vec<i32>) -> (i32, i32) {
     let mut similarity_score = 0;
 
-    eprintln!("left: {left:?}; right: {right:?}");
     let distance: i32 = left
         .iter()
         .zip(right.iter())
@@ -65,6 +64,7 @@ pub fn part_2() {
 }
 
 fn main() {
+    part_1();
     part_2();
 }
 
