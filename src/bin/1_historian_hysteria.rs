@@ -1,5 +1,3 @@
-use std::collections::hash_map;
-
 use advent_of_code::read_csv;
 
 const FIRST_DATASET_PATH: &str = "./data/1_historian_hysteria.csv";
@@ -24,7 +22,7 @@ fn clean_dataset(dataset: Vec<String>) -> (Vec<i32>, Vec<i32>) {
     left.sort();
     right.sort();
 
-    return (left, right);
+    (left, right)
 }
 
 fn find_smallest_distance(left: Vec<i32>, right: Vec<i32>) -> i32 {
@@ -35,28 +33,35 @@ fn find_smallest_distance(left: Vec<i32>, right: Vec<i32>) -> i32 {
         .sum();
 }
 
-// fn find_smallest_distance_with_similarity_score(left: Vec<i32>, right: Vec<i32>) -> (i32, i32) {
-//     let similarity_score = 0;
-//     let distance = left
-//         .iter()
-//         .zip(right.iter())
-//         .map(|(l, r)| (l - r).abs())
-//         .sum();
-//     (0, 0)
-// }
+fn find_smallest_distance_with_similarity_score(left: Vec<i32>, right: Vec<i32>) -> (i32, i32) {
+    let mut similarity_score = 0;
 
-fn part_1() {
+    eprintln!("left: {left:?}; right: {right:?}");
+    let distance: i32 = left
+        .iter()
+        .zip(right.iter())
+        .map(|(l, r)| {
+            let score = right.iter().filter(|el| *el == l).count();
+            similarity_score += *l * score as i32;
+            (l - r).abs()
+        })
+        .sum();
+
+    (distance, similarity_score)
+}
+
+pub fn part_1() {
     let dataset = read_csv(FIRST_DATASET_PATH);
     let (left, right) = clean_dataset(dataset);
     let res = find_smallest_distance(left, right);
     println!("Part 1: {res}");
 }
 
-fn part_2() {
+pub fn part_2() {
     let dataset = read_csv(SECOND_DATASET_PATH);
     let (left, right) = clean_dataset(dataset);
-    // let res = find_smallest_distance_with_similarity_score(left, right);
-    // println!("Part 2: {res:?}");
+    let res = find_smallest_distance_with_similarity_score(left, right);
+    println!("Part 2 [distance; similarity_score]: {res:?}");
 }
 
 fn main() {
@@ -100,13 +105,13 @@ mod tests {
         part_1();
     }
 
-    #[ignore = "not ready yet"]
     #[rstest]
     #[case(vec!["3 4", "4 3", "2 5", "1 3", "3 9", "3 3"], 31)]
     fn test_part_two(#[case] inputs: Vec<&str>, #[case] res: i32) {
         let inputs = inputs.iter().map(|el| el.to_string()).collect();
         let (left, right) = clean_dataset(inputs);
-        let my_res = find_smallest_distance(left, right);
-        assert_eq!(my_res, res);
+        let (_, similarity_score) =
+            find_smallest_distance_with_similarity_score(left, right);
+        assert_eq!(similarity_score, res);
     }
 }
