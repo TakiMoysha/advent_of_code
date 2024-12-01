@@ -66,7 +66,7 @@ fn main() {
         green: 13,
         blue: 14,
     };
-    let dataset: Vec<String> = read_csv("./src/data/2_cube_condrum_dataset.csv");
+    let dataset: Vec<String> = read_csv("./data/2_cube_condrum_dataset.csv");
     let valid_rounds = dataset.iter().for_each(|game| {
         let gd = GameDescription::from_string_with_condition(game, &game_condition);
     });

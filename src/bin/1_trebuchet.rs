@@ -33,7 +33,7 @@ fn find_number_in_val(line: &str) -> Result<u32, &str> {
 }
 
 fn main() {
-    let dataset = read_csv("./src/data/1_trebuchet_dataset.csv");
+    let dataset = read_csv("./data/1_trebuchet_dataset.csv");
     let res: u32 = dataset.iter().map(|line| find_number_in_val(line).unwrap()).sum();
     println!("Result: {res}");
 }
