@@ -1,8 +1,8 @@
 run name="":
   cargo run --bin {{name}}
 
-test name="":
-  cargo test --bin {{name}} -- --nocapture
+test name="" test_name="":
+  cargo test --bin {{name}} {{test_name}} -- --nocapture
 
 tag year:
   git tag -a {{year}} -m "Pazzles {{year}}"

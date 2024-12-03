@@ -4,38 +4,63 @@ use regex::Regex;
 #[derive(Debug)]
 pub struct Instruction {
     name: String,
-    args: Vec<i32>,
-    len: usize,
-    addr: usize,
+    args: Option<Vec<i32>>,
+    len: Option<usize>,
+    addr: Option<usize>,
 }
 
 impl Instruction {
     fn from_string(memory_slice: &str) -> Self {
         let start = memory_slice.find("(").unwrap();
         let end = memory_slice.find(")").unwrap();
-        let args = &memory_slice[start + 1..end]
-            .split(",")
-            .map(|num| num.parse::<i32>().unwrap())
-            .collect::<Vec<i32>>();
+        let name = String::from(&memory_slice[..start]);
+        let args = if name == "mul" {
+            Some(
+                memory_slice[start + 1..end]
+                    .split(",")
+                    .map(|num| num.parse::<i32>().unwrap())
+                    .collect::<Vec<i32>>()
+                    .to_vec(),
+            )
+        } else {
+            None
+        };
 
         Self {
-            name: String::from("mul"),
-            args: args.to_vec(),
-            len: 0,
-            addr: 0,
+            name: String::from(&memory_slice[..start]),
+            args,
+            len: None,
+            addr: None,
         }
     }
 }
 
-fn find_instruction_by_regex(memory: &str) -> Result<Vec<Instruction>, String> {
+pub fn find_instruction_by_regex(
+    memory: &str,
+    with_condition: bool,
+) -> Result<Vec<Instruction>, String> {
     let mut res: Vec<Instruction> = vec![];
-    let re = Regex::new("mul\\([0-9]{1,3},[0-9]{1,3}\\)").unwrap();
 
-    println!("DEBUG: {memory}; {re:?}");
+    let re = if with_condition {
+        Regex::new("(mul\\([0-9]{1,3},[0-9]{1,3}\\)|do\\(\\)|don't\\(\\))").unwrap()
+    } else {
+        Regex::new("mul\\([0-9]{1,3},[0-9]{1,3}\\)").unwrap()
+    };
+    // println!("DEBUG: {memory}; {re:?}");
 
+    let mut ignoring_instr = false;
     re.captures_iter(memory).for_each(|cap| {
         let _tmp: &str = &cap[0];
-        res.push(Instruction::from_string(_tmp));
+        let instr = Instruction::from_string(_tmp);
+        match instr.name.as_str() {
+            "do" => ignoring_instr = false,
+            "don't" => ignoring_instr = true,
+            _ => {
+                if !ignoring_instr {
+                    res.push(instr);
+                }
+            }
+        }
     });
 
     Ok(res)
@@ -44,7 +69,7 @@ fn find_instruction_by_regex(memory: &str) -> Result<Vec<Instruction>, String> {
 // !WARN: NOT IMPLEMENTED
 // validate, if substring is 'mul(xxx,yyy)'
 fn find_instruction(memory: &str) -> Result<Instruction, String> {
-    let mut memory_dump = memory.clone();
+    let mut memory_dump = memory;
     while let Some(start_indx) = memory_dump.find("mul(") {
         let mut next_indx = start_indx;
         let mut is_ended = false;
@@ -83,12 +108,12 @@ fn find_instruction(memory: &str) -> Result<Instruction, String> {
             if is_ended {
                 return Ok(Instruction {
                     name: String::from("mul"),
-                    args: vec![
+                    args: Some(vec![
                         first_arg.join("").parse().unwrap(),
                         second_arg.join("").parse().unwrap(),
-                    ],
-                    len: instruction_length,
-                    addr: start_indx,
+                    ]),
+                    len: Some(instruction_length),
+                    addr: Some(start_indx),
                 });
             }
         }
@@ -105,28 +130,48 @@ fn part_one() -> i32 {
     let mut start_index = 0;
     let mut instructions: Vec<Instruction> = vec![];
     while let Ok(instr) = find_instruction(&memory[start_index..]) {
-        start_index += instr.addr + instr.len;
-        println!("{instr:?}; {start_index}");
+        start_index += instr.addr.unwrap() + instr.len.unwrap();
+        // println!("{instr:?}; {start_index}");
         instructions.push(instr);
     }
     // println!("Done: {instructions:?}");
 
     instructions
         .iter()
-        .map(|instr| instr.args[0] * instr.args[1])
+        .map(|instr| {
+            let args = instr.args.as_ref().unwrap();
+            args[0] * args[1]
+        })
         .sum::<i32>()
 }
 
-fn part_one_by_regex() -> i32 {
+pub fn part_one_by_regex() -> i32 {
     let memory = read_file_lines("./data/3_mull_it_over.txt").join("");
-    let instructions = find_instruction_by_regex(memory.as_str()).unwrap();
+    let instructions = find_instruction_by_regex(memory.as_str(), false).unwrap();
     instructions
         .iter()
-        .map(|instr| instr.args[0] * instr.args[1])
+        .map(|instr| {
+            if instr.name != "mul" {
+                return 0;
+            }
+
+            let args = instr.args.as_ref().unwrap();
+            args[0] * args[1]
+        })
         .sum::<i32>()
 }
 
-fn part_two() {}
+pub fn part_two() -> i32 {
+    let memory = read_file_lines("./data/3_mull_it_over_2.txt").join("");
+    let instructions = find_instruction_by_regex(memory.as_str(), true).unwrap();
+    instructions
+        .iter()
+        .map(|instr| {
+            let args = instr.args.as_ref().unwrap();
+            args[0] * args[1]
+        })
+        .sum::<i32>()
+}
 
 fn main() {
     part_one();
@@ -141,6 +186,33 @@ mod tests {
     #[case(196826776)]
     fn test_part_one(#[case] res: i32) {
         let my_res = part_one_by_regex();
+        // println!("result: {:?} ; {}", my_res, res);
+        assert_eq!(my_res, res);
+    }
+
+    #[rstest]
+    #[case(106780429)]
+    fn test_part_two(#[case] res: i32) {
+        let my_res = part_two();
+        // println!("result: {:?} ; {}", my_res, res);
+        assert_eq!(my_res, res);
+    }
+
+    #[rstest]
+    #[case(
+        "xmul(2,4)&mul[3,7]!^don't()_mul(5,5)+mul(32,64](mul(11,8)undo()?mul(8,5))",
+        48
+    )]
+    fn tdd_part_two(#[case] memory: &str, #[case] res: i32) {
+        let instructions = find_instruction_by_regex(memory, true).unwrap();
+        let my_res: i32 = instructions
+            .iter()
+            .map(|instr| {
+                let args = instr.args.as_ref().unwrap();
+                args[0] * args[1]
+            })
+            .sum();
+        println!("result: {:?} ; {}", instructions, my_res);
         assert_eq!(my_res, res);
     }
 
@@ -149,12 +221,16 @@ mod tests {
         "xmul(2,4)%&mul[3,7]!@^do_not_mul(5,5)+mul(32,64]then(mul(11,8)mul(8,5))",
         161
     )]
-    fn tdd(#[case] memory: &str, #[case] res: i32) {
-        let instructions = find_instruction_by_regex(memory).unwrap();
+    fn tdd_part_one(#[case] memory: &str, #[case] res: i32) {
+        let instructions = find_instruction_by_regex(memory, false).unwrap();
         let my_res: i32 = instructions
             .iter()
-            .map(|instr| instr.args[0] * instr.args[1])
+            .map(|instr| {
+                let args = instr.args.as_ref().unwrap();
+                args[0] * args[1]
+            })
             .sum();
-        println!("result: {:?} ; {}", instructions, my_res);
+        // println!("result: {:?} ; {}", instructions, my_res);
+        assert_eq!(my_res, res);
     }
 }
