@@ -1,4 +1,4 @@
-use advent_of_code::read_csv;
+use advent_of_code::read_file_lines;
 
 const FIRST_DATASET_PATH: &str = "./data/1_historian_hysteria.csv";
 const SECOND_DATASET_PATH: &str = "./data/1_historian_hysteria_2.csv";
@@ -50,14 +50,14 @@ fn find_smallest_distance_with_similarity_score(left: Vec<i32>, right: Vec<i32>)
 }
 
 pub fn part_1() {
-    let dataset = read_csv(FIRST_DATASET_PATH);
+    let dataset = read_file_lines(FIRST_DATASET_PATH);
     let (left, right) = clean_dataset(dataset);
     let res = find_smallest_distance(left, right);
     println!("Part 1: {res}");
 }
 
 pub fn part_2() {
-    let dataset = read_csv(SECOND_DATASET_PATH);
+    let dataset = read_file_lines(SECOND_DATASET_PATH);
     let (left, right) = clean_dataset(dataset);
     let res = find_smallest_distance_with_similarity_score(left, right);
     println!("Part 2 [distance; similarity_score]: {res:?}");

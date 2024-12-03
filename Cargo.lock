@@ -7,6 +7,7 @@ name = "advent_of_code"
 version = "0.1.0"
 dependencies = [
  "divan",
+ "regex",
  "rstest",
 ]
 

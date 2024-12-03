@@ -1,4 +1,4 @@
-use advent_of_code::read_csv;
+use advent_of_code::read_file_lines;
 
 type Report = Vec<i32>;
 fn parse_data(dataset: Vec<String>) -> Vec<Report> {
@@ -16,12 +16,6 @@ enum Trend {
     NotInit,
     Increasing,
     Decreasing,
-}
-
-#[derive(PartialEq, Eq)]
-enum DampenerStatus {
-    Free,
-    Taken,
 }
 
 fn _check_report_with_dampener(report: &Report) -> Result<(), usize> {
@@ -125,14 +119,14 @@ fn check_report(report: &Report) -> bool {
 }
 
 pub fn part_one() -> i32 {
-    let dataset = read_csv("data/2_rednosed_reports.csv");
+    let dataset = read_file_lines("data/2_rednosed_reports.csv");
     let mut reports = parse_data(dataset);
     reports.retain(check_report);
     reports.len() as i32
 }
 
 pub fn part_two() -> i32 {
-    let dataset = read_csv("data/2_rednosed_reports_2.csv");
+    let dataset = read_file_lines("data/2_rednosed_reports_2.csv");
     let reports = parse_data(dataset);
     reports
         .iter()
