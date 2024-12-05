@@ -4,7 +4,7 @@ use regex::Regex;
 #[derive(Debug)]
 pub struct Instruction {
     name: String,
-    args: Option<Vec<i32>>,
+    args: Option<(i32, i32)>,
     len: Option<usize>,
     addr: Option<usize>,
 }
@@ -15,13 +15,12 @@ impl Instruction {
         let end = memory_slice.find(")").unwrap();
         let name = String::from(&memory_slice[..start]);
         let args = if name == "mul" {
-            Some(
-                memory_slice[start + 1..end]
-                    .split(",")
-                    .map(|num| num.parse::<i32>().unwrap())
-                    .collect::<Vec<i32>>()
-                    .to_vec(),
-            )
+            let _tmp = memory_slice[start + 1..end]
+                .split(",")
+                .map(|num| num.parse::<i32>().unwrap())
+                .collect::<Vec<i32>>()
+                .to_vec();
+            Some((_tmp[0], _tmp[1]))
         } else {
             None
         };
@@ -108,10 +107,10 @@ fn find_instruction(memory: &str) -> Result<Instruction, String> {
             if is_ended {
                 return Ok(Instruction {
                     name: String::from("mul"),
-                    args: Some(vec![
+                    args: Some((
                         first_arg.join("").parse().unwrap(),
                         second_arg.join("").parse().unwrap(),
-                    ]),
+                    )),
                     len: Some(instruction_length),
                     addr: Some(start_indx),
                 });
@@ -140,7 +139,7 @@ fn part_one() -> i32 {
         .iter()
         .map(|instr| {
             let args = instr.args.as_ref().unwrap();
-            args[0] * args[1]
+            args.0 * args.1
         })
         .sum::<i32>()
 }
@@ -156,7 +155,7 @@ pub fn part_one_by_regex() -> i32 {
             }
 
             let args = instr.args.as_ref().unwrap();
-            args[0] * args[1]
+            args.0 * args.1
         })
         .sum::<i32>()
 }
@@ -168,7 +167,7 @@ pub fn part_two() -> i32 {
         .iter()
         .map(|instr| {
             let args = instr.args.as_ref().unwrap();
-            args[0] * args[1]
+            args.0 * args.1
         })
         .sum::<i32>()
 }
@@ -209,7 +208,8 @@ mod tests {
             .iter()
             .map(|instr| {
                 let args = instr.args.as_ref().unwrap();
-                args[0] * args[1]
+                args.0 * args.1
+                
             })
             .sum();
         println!("result: {:?} ; {}", instructions, my_res);
@@ -227,7 +227,7 @@ mod tests {
             .iter()
             .map(|instr| {
                 let args = instr.args.as_ref().unwrap();
-                args[0] * args[1]
+                args.0 * args.1
             })
             .sum();
         // println!("result: {:?} ; {}", instructions, my_res);
