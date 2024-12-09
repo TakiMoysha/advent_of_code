@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use advent_of_code::read_file_lines;
 
 // available solutions for ceres search:
@@ -6,31 +8,6 @@ use advent_of_code::read_file_lines;
 //
 // good points:
 // * find all X positions (as start)
-
-#[derive(Debug)]
-struct Direction(isize, isize);
-
-impl Direction {
-    const UP: Self = Self(-1, 0);
-    const DOWN: Self = Self(1, 0);
-    const LEFT: Self = Self(0, -1);
-    const RIGHT: Self = Self(0, 1);
-    const UP_LEFT: Self = Self(-1, -1);
-    const UP_RIGHT: Self = Self(-1, 1);
-    const DOWN_LEFT: Self = Self(1, -1);
-    const DOWN_RIGHT: Self = Self(1, 1);
-}
-
-const DIRECTIONS: [Direction; 8] = [
-    Direction::LEFT,
-    Direction::UP_LEFT,
-    Direction::UP,
-    Direction::UP_RIGHT,
-    Direction::RIGHT,
-    Direction::DOWN_RIGHT,
-    Direction::DOWN_LEFT,
-    Direction::DOWN,
-];
 
 #[derive(Debug)]
 struct CeresListVec {
@@ -51,19 +28,56 @@ impl CeresListVec {
         }
     }
 
-    pub fn find_line_potential_starts(line: &Vec<char>) -> Vec<usize> {
+    fn find_indx_by_symbol_in_line(line: &Vec<char>, symbol: &char) -> Vec<usize> {
         line.iter()
             .enumerate()
-            .filter_map(|(indx, ch)| if *ch == 'X' { Some(indx) } else { None })
+            .filter_map(|(indx, ch)| if *ch == *symbol { Some(indx) } else { None })
             .collect()
     }
 
-    pub fn search_xmas_by_point(point: (usize, usize), data: &Vec<Vec<char>>) -> i32 {
+    // !TODO: problem with orientations of M and S
+    fn validate_shape_mas_by_point(point: (usize, usize), data: &Vec<Vec<char>>) -> i32 {
+        println!("P: {point:?}");
+        const WORLDS_SCHEMA: [(char, isize, isize); 4] =
+            [('M', -1, -1), ('M', 1, -1), ('S', -1, 1), ('S', 1, 1)];
+
+        for schema in WORLDS_SCHEMA {
+            let current_char = &schema.0;
+            let line_indx = point.0 as isize + schema.1;
+            let char_indx = point.1 as isize + schema.2;
+
+            if !(0 <= line_indx && line_indx < data.len() as isize)
+                || !(0 <= char_indx && char_indx < data[line_indx as usize].len() as isize)
+            {
+                eprintln!("Out of range: {line_indx}, {char_indx}");
+                break;
+            }
+
+            if &data[line_indx as usize][char_indx as usize] != current_char {
+                break;
+            }
+        }
+
+        1
+    }
+
+    fn search_xmas_by_point(point: (usize, usize), data: &Vec<Vec<char>>) -> i32 {
+        const DIRECTIONS: [(isize, isize); 8] = [
+            (0, -1),
+            (-1, -1),
+            (-1, 0),
+            (-1, 1),
+            (0, 1),
+            (1, 1),
+            (1, 0),
+            (1, -1),
+        ];
+        const WORLD: [char; 4] = ['X', 'M', 'A', 'S'];
+
         let mut occurrences = 0;
-        let world = ['X', 'M', 'A', 'S'];
         for direction in DIRECTIONS {
             // validate world
-            for (symbol_indx, symbol) in world.iter().enumerate() {
+            for (symbol_indx, symbol) in WORLD.iter().enumerate() {
                 let indx = symbol_indx as isize;
                 let line_indx = point.0 as isize + direction.0 * indx;
                 let char_indx = point.1 as isize + direction.1 * indx;
@@ -80,7 +94,7 @@ impl CeresListVec {
                     break;
                 }
 
-                if symbol_indx == world.len() - 1 {
+                if symbol_indx == WORLD.len() - 1 {
                     // println!("\tCorrect: {symbol}, {line_indx}, {char_indx}!");
                     occurrences += 1;
                 }
@@ -89,13 +103,35 @@ impl CeresListVec {
         occurrences
     }
 
-    pub fn find_all_occurrences(self) -> i32 {
+    pub fn find_all_shape_mas_occurrences(self) -> i32 {
         let points: Vec<(usize, usize)> = self
             .data
             .iter()
             .enumerate()
             .flat_map(|(line_indx, line)| {
-                Self::find_line_potential_starts(line)
+                Self::find_indx_by_symbol_in_line(line, &'A')
+                    .into_iter()
+                    .map(|ch_indx| (line_indx, ch_indx))
+                    .collect::<Vec<(usize, usize)>>()
+            })
+            .collect();
+
+        let res: Vec<i32> = points
+            .iter()
+            .map(|point| Self::validate_shape_mas_by_point(*point, &self.data))
+            .collect();
+
+        println!("res: {res:?}");
+        0
+    }
+
+    pub fn find_all_xmas_occurrences(self) -> i32 {
+        let points: Vec<(usize, usize)> = self
+            .data
+            .iter()
+            .enumerate()
+            .flat_map(|(line_indx, line)| {
+                Self::find_indx_by_symbol_in_line(line, &'X')
                     .into_iter()
                     .map(|ch_indx| (line_indx, ch_indx))
                     .collect::<Vec<(usize, usize)>>()
@@ -113,14 +149,21 @@ pub fn part_one() -> i32 {
     let data = read_file_lines("./data/4_ceres_search.txt");
     let prepared_data = data.iter().map(|el| el.as_str()).collect();
     let ceres = CeresListVec::from_str(prepared_data);
-    ceres.find_all_occurrences()
+    ceres.find_all_xmas_occurrences()
 }
 
-pub fn part_two() {}
+pub fn part_two() -> i32 {
+    let data = read_file_lines("./data/4_ceres_search_2.txt");
+    let prepared_data = data.iter().map(|el| el.as_str()).collect();
+    let ceres = CeresListVec::from_str(prepared_data);
+    ceres.find_all_shape_mas_occurrences()
+}
 
 fn main() {
     let one_result = part_one();
     println!("PartONE: {one_result:?}");
+    let two_result = part_two();
+    println!("PartTWO: {two_result:?}");
 }
 
 #[cfg(test)]
@@ -140,15 +183,31 @@ mod tests {
         "SAXAMASAAA",
         "MAMMMXMMMM",
         "MXMXAXMASX",
-    ], 0)]
+    ], 18)]
     fn test_part_one(#[case] input: Vec<&str>, #[case] res: i32) {
         let ceres = CeresListVec::from_str(input);
-        ceres.find_all_occurrences();
+        assert_eq!(ceres.find_all_xmas_occurrences(), res);
     }
 
     #[rstest]
-    #[case(vec![], 0)]
-    fn test_part_two(#[case] input: Vec<&str>, #[case] res: i32) {}
+    #[case(vec![
+        "MMMSXXMASM",
+        "MSAMXMSMSA",
+        "AMXSXMAAMM",
+        "MSAMASMSMX",
+        "XMASAMXAMM",
+        "XXAMMXXAMA",
+        "SMSMSASXSS",
+        "SAXAMASAAA",
+        "MAMMMXMMMM",
+        "MXMXAXMASX",
+    ], 9)]
+    fn test_part_two(#[case] input: Vec<&str>, #[case] res: i32) {
+        let ceres = CeresListVec::from_str(input);
+        let my_res = ceres.find_all_shape_mas_occurrences();
+        println!("res: {:?}", my_res);
+        assert_eq!(my_res, res);
+    }
 
     // #[rstest]
     // #[case(vec!["MMMSXXMASM",])]
