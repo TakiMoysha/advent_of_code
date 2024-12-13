@@ -1,14 +1,27 @@
+use std::collections::HashMap;
+
 use advent_of_code::read_file_lines;
 
 const FIRST_DATASET_PATH: &str = "./data/5_print_queue.txt";
 const SECOND_DATASET_PATH: &str = "./data/5_print_queue_2.txt";
 
-#[derive(Debug)]
-struct RuleOrderingSection(String);
-#[derive(Debug)]
-struct ProduceUpdateSection(String);
+type PageNumber = u32;
 
-pub fn load_sections_from_file(path: &str) -> (Vec<String>, Vec<String>) {
+#[derive(Debug)]
+struct RuleOrderingSection(PageNumber, PageNumber);
+impl RuleOrderingSection {
+    pub fn from_raw(raw_vec: Vec<String>) -> Self {
+        let raw: Vec<Vec<&String>> = raw_vec.iter().map(|s| s.split('|')).collect();
+        // let page1: PageNumber = raw[0].parse().unwrap();
+        // let page2: PageNumber = raw[1].parse().unwrap();
+        RuleOrderingSection(page1, page2)
+    }
+}
+
+#[derive(Debug)]
+struct ProduceUpdateSection(Vec<PageNumber>);
+
+pub fn read_sections_from_file(path: &str) -> (Vec<String>, Vec<String>) {
     let mut content = read_file_lines(path);
 
     let (divider_indx, _) = content
@@ -24,7 +37,7 @@ pub fn load_sections_from_file(path: &str) -> (Vec<String>, Vec<String>) {
 }
 
 pub fn part_one() {
-    load_sections_from_file("./data/5_print_queue.txt");
+    read_sections_from_file("./data/5_print_queue.txt");
 }
 pub fn part_two() {}
 
@@ -71,7 +84,8 @@ mod tests {
     #[rstest]
     #[case(FIRST_DATASET_PATH, 0)]
     fn test_loading_content(#[case] path: &str, #[case] res: i32) {
-        let (section_one, section_two)= load_sections_from_file(path);
-        println!("section one: {:#?}\nsection two: {:#?}", section_one, section_two);
+        let (section_one, section_two) = read_sections_from_file(path);
+        assert!(!section_one.is_empty());
+        assert!(!section_two.is_empty());
     }
 }
