@@ -1,6 +1,6 @@
 use std::{ops::Index, str::FromStr, string::ParseError};
 
-use advent_of_code::{load_sections_from_file, read_file_lines, split_and_parse_data};
+use advent_of_code::{load_sections_from_file, parse_struct_from_str};
 
 const FIRST_DATASET_PATH: &str = "./data/5_print_queue.txt";
 const SECOND_DATASET_PATH: &str = "./data/5_print_queue_2.txt";
@@ -68,8 +68,8 @@ fn check_produce_udpate_ordering(
 }
 
 pub fn part_one(section_one: Vec<&str>, section_two: Vec<&str>) -> u32 {
-    let s_one = split_and_parse_data::<OrderingRule>(section_one).unwrap();
-    let s_two = split_and_parse_data::<UpdateSchema>(section_two).unwrap();
+    let s_one = parse_struct_from_str::<OrderingRule>(section_one).unwrap();
+    let s_two = parse_struct_from_str::<UpdateSchema>(section_two).unwrap();
     let mut sum_of_middle = 0;
 
     for up_schema in &s_two {
