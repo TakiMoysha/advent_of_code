@@ -27,9 +27,10 @@ pub fn load_sections_from_file(path: &str) -> (Vec<String>, Vec<String>) {
     (content, section_two)
 }
 
-pub fn split_and_parse_data<F: FromStr>(s: &str) -> Result<Vec<F>, F::Err> {
+pub fn split_and_parse_data<F: FromStr>(strings: Vec<&str>) -> Result<Vec<F>, F::Err> {
     // split s and parse every string to F, then collect and return
-    s.lines()
+    strings
+        .iter()
         .map(|s| s.parse::<F>())
         .collect::<Result<Vec<F>, F::Err>>()
 }
