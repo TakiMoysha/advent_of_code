@@ -34,3 +34,90 @@ pub fn parse_struct_from_str<F: FromStr>(strings: Vec<&str>) -> Result<Vec<F>, F
         .map(|s| s.parse::<F>())
         .collect::<Result<Vec<F>, F::Err>>()
 }
+
+// --------------------- TREE-LIB ------------------------------
+use std::mem;
+
+#[derive(Debug)]
+enum Node<Item> {
+    Leaf(Item),
+    Children(Vec<Node<Item>>),
+}
+
+impl<It> Node<It> {
+    fn traverse(&self, f: impl Fn(&It)) {
+        match self {
+            Node::Leaf(item) => f(item),
+            Node::Children(children) => {
+                children.iter().for_each(|n| n.traverse(&f));
+            }
+        }
+    }
+
+    fn iter(&self) -> NodeIter<'_, It> {
+        NodeIter {
+            child: std::slice::from_ref(self),
+            parent: None,
+        }
+    }
+}
+
+struct NodeIter<'a, It> {
+    child: &'a [Node<It>],
+    parent: Option<Box<NodeIter<'a, It>>>,
+}
+
+impl<It> Default for NodeIter<'_, It> {
+    fn default() -> Self {
+        NodeIter {
+            child: &[],
+            parent: None,
+        }
+    }
+}
+impl<'a, It> Iterator for NodeIter<'a, It> {
+    type Item = &'a It;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        match self.child.first() {
+            None => match self.parent.take() {
+                Some(parent) => {
+                    *self = *parent;
+                    self.next()
+                }
+                None => None,
+            },
+            Some(Node::Leaf(item)) => {
+                self.child = &self.child[1..];
+                Some(item)
+            }
+            Some(Node::Children(children)) => {
+                self.child = &self.child[1..];
+
+                *self = NodeIter {
+                    child: children.as_slice(),
+                    parent: Some(Box::new(mem::take(self))),
+                };
+                self.next()
+            }
+        }
+    }
+}
+
+#[cfg(test)]
+mod lib_tests {
+    use super::*;
+
+    #[test]
+
+    fn test_tree_struct() {
+        let tree = Node::Children(vec![
+            Node::Leaf(1),
+            Node::Leaf(2),
+            Node::Children(vec![Node::Leaf(3), Node::Leaf(4), Node::Children(vec![])]),
+        ]);
+
+        let nums: Vec<i32> = tree.iter().copied().collect();
+        assert_eq!(nums, vec![1, 2, 3, 4]);
+    }
+}
