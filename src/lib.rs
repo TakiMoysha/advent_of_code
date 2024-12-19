@@ -12,7 +12,7 @@ pub fn read_file_lines(path: &str) -> Vec<String> {
 
 // --------------------- 5_print_queue.rs ---------------------
 pub fn load_sections_from_file(path: &str) -> (Vec<String>, Vec<String>) {
-    // load the file content
+    // load the file content with empty line as a divider between TWO sections
     let mut content = read_file_lines(path);
 
     let (divider_indx, _) = content
