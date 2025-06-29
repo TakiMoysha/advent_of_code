@@ -1,3 +1,5 @@
+set dotenv-load
+
 run name="":
   cargo run --bin {{name}}
 
