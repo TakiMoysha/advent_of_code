@@ -1,13 +1,13 @@
 [package]
 name = "advent_of_code"
 version = "0.1.0"
-edition = "2021"
+edition = "2024"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-regex = "1.11.1"
-rstest = "0.23.0"
+regex = "1.12"
+rstest = "0.26"
 
 [dev-dependencies]
-divan = "0.1.4"
+divan = "0.1"
