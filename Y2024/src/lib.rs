@@ -1,4 +1,4 @@
-#![warn(non_snake_case)]
+#![allow(non_snake_case)]
 
 use std::path::Path;
 use std::{fs, str::FromStr};

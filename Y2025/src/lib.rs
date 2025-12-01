@@ -1,10 +1,18 @@
+#![allow(non_snake_case)]
 
-#[cfg(tests)]
-mod tests {
-    use super::*;
+use std::fs;
+use std::path::Path;
 
-    #[test]
-    fn test_main() {
-        assert!(true);
-    }
+mod macros;
+
+pub fn read_file_lines<P>(path: P) -> Vec<String>
+where
+    P: AsRef<Path>,
+{
+    let canonical_path = fs::canonicalize(path).expect("Path {path:?} is invalid");
+    fs::read_to_string(canonical_path)
+        .expect("Can't read file: {path:?}")
+        .lines()
+        .map(String::from)
+        .collect()
 }

@@ -7,6 +7,7 @@ edition = "2024"
 
 [workspace.dependencies]
 regex = "1.12"
+# tests
 rstest = "0.26"
-#
+# benches
 divan = "0.1"
