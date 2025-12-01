@@ -1,4 +1,4 @@
-use advent_of_code::read_file_lines;
+use Y2024::{dataset_path, read_file_lines};
 use regex::Regex;
 
 #[derive(Debug)]
@@ -69,14 +69,14 @@ pub fn find_instruction_by_regex(
 // validate, if substring is 'mul(xxx,yyy)'
 fn find_instruction(memory: &str) -> Result<Instruction, String> {
     let mut memory_dump = memory;
-    while let Some(start_indx) = memory_dump.find("mul(") {
-        let mut next_indx = start_indx;
+    while let Some(start_idx) = memory_dump.find("mul(") {
+        let mut next_idx = start_idx;
         let mut is_ended = false;
         let mut instruction_length = 4;
         let mut first_arg: Vec<String> = vec![];
         let mut second_arg: Vec<String> = vec![];
         let mut x: Vec<String> = vec![];
-        memory_dump = &memory_dump[start_indx..];
+        memory_dump = &memory_dump[start_idx..];
 
         for (indx, char) in memory_dump[4..].chars().enumerate() {
             // println!("iter: {char}");
@@ -89,7 +89,7 @@ fn find_instruction(memory: &str) -> Result<Instruction, String> {
                 x.push(char.to_string());
                 instruction_length += 1;
             } else if x.len() > 3 {
-                next_indx = start_indx + "mul(".len();
+                next_idx = start_idx + "mul(".len();
                 break;
             }
 
@@ -112,12 +112,12 @@ fn find_instruction(memory: &str) -> Result<Instruction, String> {
                         second_arg.join("").parse().unwrap(),
                     )),
                     len: Some(instruction_length),
-                    addr: Some(start_indx),
+                    addr: Some(start_idx),
                 });
             }
         }
 
-        memory_dump = &memory_dump[next_indx + 3..];
+        memory_dump = &memory_dump[next_idx + 3..];
     }
 
     Err(String::from("Invalid instruction"))
@@ -125,7 +125,7 @@ fn find_instruction(memory: &str) -> Result<Instruction, String> {
 
 // !WARN: NOT IMPLEMENTED
 fn part_one() -> i32 {
-    let memory = read_file_lines("./data/3_mull_it_over.txt").join("");
+    let memory = read_file_lines(dataset_path!("3_mull_it_over.txt")).join("");
     let mut start_index = 0;
     let mut instructions: Vec<Instruction> = vec![];
     while let Ok(instr) = find_instruction(&memory[start_index..]) {
@@ -145,7 +145,7 @@ fn part_one() -> i32 {
 }
 
 pub fn part_one_by_regex() -> i32 {
-    let memory = read_file_lines("./data/3_mull_it_over.txt").join("");
+    let memory = read_file_lines(dataset_path!("3_mull_it_over.txt")).join("");
     let instructions = find_instruction_by_regex(memory.as_str(), false).unwrap();
     instructions
         .iter()
@@ -161,7 +161,7 @@ pub fn part_one_by_regex() -> i32 {
 }
 
 pub fn part_two() -> i32 {
-    let memory = read_file_lines("./data/3_mull_it_over_2.txt").join("");
+    let memory = read_file_lines(dataset_path!("3_mull_it_over_2.txt")).join("");
     let instructions = find_instruction_by_regex(memory.as_str(), true).unwrap();
     instructions
         .iter()
@@ -209,7 +209,6 @@ mod tests {
             .map(|instr| {
                 let args = instr.args.as_ref().unwrap();
                 args.0 * args.1
-                
             })
             .sum();
         println!("result: {:?} ; {}", instructions, my_res);

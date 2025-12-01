@@ -1,9 +1,9 @@
 use std::{ops::Index, str::FromStr, string::ParseError};
 
-use advent_of_code::{load_sections_from_file, parse_struct_from_str};
+use Y2024::{dataset_path, load_sections_from_file, parse_struct_from_str};
 
-const FIRST_DATASET_PATH: &str = "./data/5_print_queue.txt";
-const SECOND_DATASET_PATH: &str = "./data/5_print_queue_2.txt";
+const FIRST_DATASET_PATH: &str = dataset_path!("5_print_queue.txt");
+const SECOND_DATASET_PATH: &str = dataset_path!("5_print_queue_2.txt");
 
 type PageNumber = u32;
 
@@ -18,7 +18,7 @@ impl FromStr for OrderingRule {
             .split('|')
             .map(|s| {
                 s.parse::<u32>()
-                    .expect(format!("Error while parsing: {s:?}").as_str())
+                    .unwrap_or_else(|_| panic!("Error while parsing: {s:?}"))
             })
             .collect::<Vec<u32>>();
         Ok(OrderingRule(res[0], res[1]))
@@ -36,7 +36,7 @@ impl FromStr for UpdateSchema {
             .split(',')
             .map(|s| {
                 s.parse::<u32>()
-                    .expect(format!("Error while parsing: {s:?}").as_str())
+                    .unwrap_or_else(|_| panic!("Error while parsing: {s:?}"))
             })
             .collect::<Vec<u32>>();
         Ok(UpdateSchema(res))
@@ -80,7 +80,9 @@ fn fix_produce_update_schema(rules: &Vec<OrderingRule>, schema: &UpdateSchema) -
             let second = _schema.iter().position(|x| *x == rule.1).unwrap_or(1);
             if first > second {
                 // rule violation
-                todo!("i'm too lazy for implement this, but i know how to do it and will do it later");
+                todo!(
+                    "i'm too lazy for implement this, but i know how to do it and will do it later"
+                );
             }
         }
     }

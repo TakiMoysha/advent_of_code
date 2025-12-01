@@ -1,9 +1,18 @@
+#![warn(non_snake_case)]
+
+use std::path::Path;
 use std::{fs, str::FromStr};
 
-pub fn read_file_lines(path: &str) -> Vec<String> {
-    println!("Reading file: {path:?}");
+mod macros;
 
-    fs::read_to_string(path)
+pub fn read_file_lines<P>(path: P) -> Vec<String>
+where
+    P: AsRef<Path>,
+{
+    let canonical_path = fs::canonicalize(path).expect("Path {path:?} is invalid");
+    println!("Reading file: {canonical_path:?}");
+
+    fs::read_to_string(canonical_path)
         .expect("Can't read file: {path:?}")
         .lines()
         .map(String::from)
@@ -15,13 +24,13 @@ pub fn load_sections_from_file(path: &str) -> (Vec<String>, Vec<String>) {
     // load the file content with empty line as a divider between TWO sections
     let mut content = read_file_lines(path);
 
-    let (divider_indx, _) = content
+    let (divider_idx, _) = content
         .iter()
         .enumerate()
         .find(|(_, line)| line.is_empty())
         .expect("empty line not found");
 
-    let mut section_two: Vec<String> = content.split_off(divider_indx);
+    let mut section_two: Vec<String> = content.split_off(divider_idx);
     section_two.remove(0);
 
     (content, section_two)

@@ -1,6 +1,6 @@
 use std::{collections::HashSet, ops::IndexMut};
 
-use advent_of_code::read_file_lines;
+use Y2024::read_file_lines;
 
 const DIRECTIONS: [char; 4] = ['^', '>', 'v', '<'];
 const OBSTACLE: char = '#';
@@ -26,13 +26,13 @@ impl Guardian {
         }
     }
 
-    fn turn_rigth(&mut self) {
+    fn turn_right(&mut self) {
         self.direction = match self.direction {
             '^' => '>',
             '>' => 'v',
             'v' => '<',
             '<' => '^',
-            _ => unreachable!("turn_rith->direction match error"),
+            _ => unreachable!("turn_right->direction match error"),
         };
     }
 
@@ -64,9 +64,9 @@ impl<'a> From<&'a str> for Laboratory<'a> {
         let height = field.len() - 1;
 
         let mut guard_position: Option<GuardPosition> = None;
-        for (line_indx, line) in field.iter().enumerate() {
+        for (line_idx, line) in field.iter().enumerate() {
             if let Some(pos) = line.chars().position(|c| DIRECTIONS.contains(&c)) {
-                guard_position = Some((pos, line_indx));
+                guard_position = Some((pos, line_idx));
                 break;
             }
         }
@@ -101,7 +101,7 @@ impl Iterator for Laboratory<'_> {
 
         // check if there is an obstacle
         if self.field[new_pos.1].chars().nth(new_pos.0).unwrap() == OBSTACLE {
-            self.guard.turn_rigth();
+            self.guard.turn_right();
             new_pos = self.guard.move_forward(&self.guard.pos);
         }
 
@@ -121,7 +121,7 @@ fn part_one(input: &str) {
 }
 
 fn main() {
-    let input = read_file_lines("./data/6_guard_gallivant.txt").join("\n");
+    let input = read_file_lines(dataset_path!("6_guard_gallivant.txt")).join("\n");
     part_one(input.as_str())
 }
 

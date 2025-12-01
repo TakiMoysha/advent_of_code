@@ -1,7 +1,7 @@
-use advent_of_code::read_file_lines;
+use Y2024::{dataset_path, read_file_lines};
 
-const FIRST_DATASET_PATH: &str = "./data/1_historian_hysteria.csv";
-const SECOND_DATASET_PATH: &str = "./data/1_historian_hysteria_2.csv";
+const FIRST_DATASET_PATH: &str = dataset_path!("1_historian_hysteria.csv");
+const SECOND_DATASET_PATH: &str = dataset_path!("1_historian_hysteria_2.csv");
 
 fn parse_line(line: &str) -> Vec<i32> {
     line.split_whitespace()
@@ -26,11 +26,10 @@ fn clean_dataset(dataset: Vec<String>) -> (Vec<i32>, Vec<i32>) {
 }
 
 fn find_smallest_distance(left: Vec<i32>, right: Vec<i32>) -> i32 {
-    return left
-        .iter()
+    left.iter()
         .zip(right.iter())
         .map(|(l, r)| (l - r).abs())
-        .sum();
+        .sum()
 }
 
 fn find_smallest_distance_with_similarity_score(left: Vec<i32>, right: Vec<i32>) -> (i32, i32) {
@@ -79,8 +78,7 @@ mod tests {
     #[case("96434 90834", vec![96434, 90834])]
     #[case("70853 80045", vec![70853, 80045])]
     fn test_line_parsing(#[case] line: &str, #[case] res: Vec<i32>) {
-        let splited: Vec<i32> = parse_line(line);
-        assert_eq!(splited, res);
+        assert_eq!(parse_line(line), res);
     }
 
     #[rstest]
@@ -110,8 +108,7 @@ mod tests {
     fn test_part_two(#[case] inputs: Vec<&str>, #[case] res: i32) {
         let inputs = inputs.iter().map(|el| el.to_string()).collect();
         let (left, right) = clean_dataset(inputs);
-        let (_, similarity_score) =
-            find_smallest_distance_with_similarity_score(left, right);
+        let (_, similarity_score) = find_smallest_distance_with_similarity_score(left, right);
         assert_eq!(similarity_score, res);
     }
 }

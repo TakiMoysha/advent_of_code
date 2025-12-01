@@ -1,4 +1,4 @@
-use advent_of_code::read_file_lines;
+use Y2024::{dataset_path, read_file_lines};
 
 type Report = Vec<i32>;
 fn parse_data(dataset: Vec<String>) -> Vec<Report> {
@@ -22,12 +22,12 @@ fn _check_report_with_dampener(report: &Report) -> Result<(), usize> {
     let mut trend = Trend::NotInit;
 
     for window in report.windows(2).enumerate() {
-        if let (indx, [prev, next]) = window {
-            println!("DEBUG: {indx}: {prev}-{next}");
+        if let (idx, [prev, next]) = window {
+            println!("DEBUG: {idx}: {prev}-{next}");
             let diff = prev - next;
             if !(1..=3).contains(&diff.abs()) {
-                println!("ERR[BadAdjacent({indx}:{prev}-{next})]: {report:?};");
-                return Err(indx);
+                println!("ERR[BadAdjacent({idx}:{prev}-{next})]: {report:?};");
+                return Err(idx);
             }
 
             match trend {
@@ -35,21 +35,21 @@ fn _check_report_with_dampener(report: &Report) -> Result<(), usize> {
                     1 => trend = Trend::Decreasing,
                     -1 => trend = Trend::Increasing,
                     0 => {
-                        println!("DEBUG-RETURN: {indx}: {prev}-{next}");
-                        return Err(indx);
+                        println!("DEBUG-RETURN: {idx}: {prev}-{next}");
+                        return Err(idx);
                     }
                     _ => unreachable!(),
                 },
                 Trend::Increasing => {
                     if prev > next {
-                        println!("ERR[BadTrend({indx}:{prev}-{next})]: {report:?}");
-                        return Err(indx);
+                        println!("ERR[BadTrend({idx}:{prev}-{next})]: {report:?}");
+                        return Err(idx);
                     }
                 }
                 Trend::Decreasing => {
                     if prev < next {
-                        println!("ERR[BadTrend({indx}:{prev}-{next})]: {report:?}");
-                        return Err(indx);
+                        println!("ERR[BadTrend({idx}:{prev}-{next})]: {report:?}");
+                        return Err(idx);
                     }
                 }
             }
@@ -77,9 +77,9 @@ pub fn check_report_with_dampener(or_report: &Report) -> bool {
     }
 }
 
-// gradually incrasing or decreasing.
+// gradually increasing or decreasing.
 // * levels are aither all increasing or all decreasing
-// * any two adjacent levels differ by alteast one and at most three
+// * any two adjacent levels differ by atleast one and at most three
 fn check_report(report: &Report) -> bool {
     let mut trend = Trend::NotInit;
 
@@ -119,14 +119,14 @@ fn check_report(report: &Report) -> bool {
 }
 
 pub fn part_one() -> i32 {
-    let dataset = read_file_lines("data/2_rednosed_reports.csv");
+    let dataset = read_file_lines(dataset_path!("2_rednosed_reports.csv"));
     let mut reports = parse_data(dataset);
     reports.retain(check_report);
     reports.len() as i32
 }
 
 pub fn part_two() -> i32 {
-    let dataset = read_file_lines("data/2_rednosed_reports_2.csv");
+    let dataset = read_file_lines(dataset_path!("2_rednosed_reports_2.csv"));
     let reports = parse_data(dataset);
     reports
         .iter()

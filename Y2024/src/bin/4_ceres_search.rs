@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use advent_of_code::read_file_lines;
+use Y2024::{dataset_path, read_file_lines};
 
 // available solutions for ceres search:
 // * defined directions (up, down, left, right, up-left, up-right, down-left, down-right)
@@ -28,10 +28,10 @@ impl CeresListVec {
         }
     }
 
-    fn find_indx_by_symbol_in_line(line: &Vec<char>, symbol: &char) -> Vec<usize> {
+    fn find_index_by_symbol_in_line(line: &Vec<char>, symbol: &char) -> Vec<usize> {
         line.iter()
             .enumerate()
-            .filter_map(|(indx, ch)| if *ch == *symbol { Some(indx) } else { None })
+            .filter_map(|(idx, ch)| if *ch == *symbol { Some(idx) } else { None })
             .collect()
     }
 
@@ -43,17 +43,17 @@ impl CeresListVec {
 
         for schema in WORLDS_SCHEMA {
             let current_char = &schema.0;
-            let line_indx = point.0 as isize + schema.1;
-            let char_indx = point.1 as isize + schema.2;
+            let line_idx = point.0 as isize + schema.1;
+            let char_idx = point.1 as isize + schema.2;
 
-            if !(0 <= line_indx && line_indx < data.len() as isize)
-                || !(0 <= char_indx && char_indx < data[line_indx as usize].len() as isize)
+            if !(0 <= line_idx && line_idx < data.len() as isize)
+                || !(0 <= char_idx && char_idx < data[line_idx as usize].len() as isize)
             {
-                eprintln!("Out of range: {line_indx}, {char_indx}");
+                eprintln!("Out of range: {line_idx}, {char_idx}");
                 break;
             }
 
-            if &data[line_indx as usize][char_indx as usize] != current_char {
+            if &data[line_idx as usize][char_idx as usize] != current_char {
                 break;
             }
         }
@@ -77,25 +77,25 @@ impl CeresListVec {
         let mut occurrences = 0;
         for direction in DIRECTIONS {
             // validate world
-            for (symbol_indx, symbol) in WORLD.iter().enumerate() {
-                let indx = symbol_indx as isize;
-                let line_indx = point.0 as isize + direction.0 * indx;
-                let char_indx = point.1 as isize + direction.1 * indx;
+            for (symbol_idx, symbol) in WORLD.iter().enumerate() {
+                let idx = symbol_idx as isize;
+                let line_idx = point.0 as isize + direction.0 * idx;
+                let char_idx = point.1 as isize + direction.1 * idx;
 
-                if !(0 <= line_indx && line_indx < data.len() as isize)
-                    || !(0 <= char_indx && char_indx < data[line_indx as usize].len() as isize)
+                if !(0 <= line_idx && line_idx < data.len() as isize)
+                    || !(0 <= char_idx && char_idx < data[line_idx as usize].len() as isize)
                 {
-                    // eprintln!("Out of range: {line_indx}, {char_indx}");
+                    // eprintln!("Out of range: {line_idx}, {char_idx}");
                     break;
                 }
 
-                if &data[line_indx as usize][char_indx as usize] != symbol {
-                    // eprintln!("Not match: {symbol}, {line_indx}, {char_indx}");
+                if &data[line_idx as usize][char_idx as usize] != symbol {
+                    // eprintln!("Not match: {symbol}, {line_idx}, {char_idx}");
                     break;
                 }
 
-                if symbol_indx == WORLD.len() - 1 {
-                    // println!("\tCorrect: {symbol}, {line_indx}, {char_indx}!");
+                if symbol_idx == WORLD.len() - 1 {
+                    // println!("\tCorrect: {symbol}, {line_idx}, {char_idx}!");
                     occurrences += 1;
                 }
             }
@@ -108,10 +108,10 @@ impl CeresListVec {
             .data
             .iter()
             .enumerate()
-            .flat_map(|(line_indx, line)| {
-                Self::find_indx_by_symbol_in_line(line, &'A')
+            .flat_map(|(line_idx, line)| {
+                Self::find_index_by_symbol_in_line(line, &'A')
                     .into_iter()
-                    .map(|ch_indx| (line_indx, ch_indx))
+                    .map(|ch_idx| (line_idx, ch_idx))
                     .collect::<Vec<(usize, usize)>>()
             })
             .collect();
@@ -130,10 +130,10 @@ impl CeresListVec {
             .data
             .iter()
             .enumerate()
-            .flat_map(|(line_indx, line)| {
-                Self::find_indx_by_symbol_in_line(line, &'X')
+            .flat_map(|(line_idx, line)| {
+                Self::find_index_by_symbol_in_line(line, &'X')
                     .into_iter()
-                    .map(|ch_indx| (line_indx, ch_indx))
+                    .map(|ch_idx| (line_idx, ch_idx))
                     .collect::<Vec<(usize, usize)>>()
             })
             .collect();
@@ -146,14 +146,14 @@ impl CeresListVec {
 }
 
 pub fn part_one() -> i32 {
-    let data = read_file_lines("./data/4_ceres_search.txt");
+    let data = read_file_lines(dataset_path!("4_ceres_search.txt"));
     let prepared_data = data.iter().map(|el| el.as_str()).collect();
     let ceres = CeresListVec::from_str(prepared_data);
     ceres.find_all_xmas_occurrences()
 }
 
 pub fn part_two() -> i32 {
-    let data = read_file_lines("./data/4_ceres_search_2.txt");
+    let data = read_file_lines(dataset_path!("4_ceres_search_2.txt"));
     let prepared_data = data.iter().map(|el| el.as_str()).collect();
     let ceres = CeresListVec::from_str(prepared_data);
     ceres.find_all_shape_mas_occurrences()
