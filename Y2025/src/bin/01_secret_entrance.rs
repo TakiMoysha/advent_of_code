@@ -68,7 +68,10 @@ fn process_safe_dial(init_dial_pos: i32, commands: Vec<String>) {
     for command in commands {
         dial.turn(&command);
     }
-    println!("Result: {dial:?} ({})", dial.set_at_zero + dial.cross_zero_count);
+    println!(
+        "Result: {dial:?} ({})",
+        dial.set_at_zero + dial.cross_zero_count
+    );
 }
 
 fn main() {
